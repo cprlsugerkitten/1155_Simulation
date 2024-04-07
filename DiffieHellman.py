@@ -35,14 +35,14 @@ def isPrime(n):
     return True
 
 
-def averageAttackSpeed(trials):
+def averageAttackSpeed(numOfBits, trials):
     xTimes = []
     yTimes = []
-    print("Starting " + str(trials) + " attacks!")
+    print("Starting " + str(trials) + " attacks on " + str(numOfBits) + " bit prime!")
     for i in range(trials):
-        p = random.getrandbits(NUM_OF_BITS) # randomly select p
+        p = random.getrandbits(numOfBits) # randomly select p
         while not isPrime(p):
-            p = random.getrandbits(NUM_OF_BITS) # make sure p is prime
+            p = random.getrandbits(numOfBits) # make sure p is prime
         g = smallestPrimRoot(p) # finds smallest primitive root of p
         x = random.randint(1,p-1) # randomly generates private values
         y = random.randint(1,p-1) # randomly generates private values
@@ -65,15 +65,16 @@ def averageAttackSpeed(trials):
 
     print("In " + str(trials) + " trials, the average time to crack x was " + str(avgX) + " seconds!")
     print("In " + str(trials) + " trials, the average time to crack y was " + str(avgY) + " seconds!")
+    print("\n")
 
     return avgX,avgY
 
     
-def attackOnce():
+def attackOnce(numOfBits):
     #Public Values
-    p = random.getrandbits(NUM_OF_BITS) # randomly select p
+    p = random.getrandbits(numOfBits) # randomly select p
     while not isPrime(p):
-        p = random.getrandbits(NUM_OF_BITS) # make sure p is prime
+        p = random.getrandbits(numOfBits) # make sure p is prime
 
     print("p = " + str(p))
     g = smallestPrimRoot(p) # finds smallest primitive root of p
@@ -103,26 +104,35 @@ def attackOnce():
     print("y = " + str(discoveredY) + " was found in " + str(foundY_time-foundX_time) + " seconds!")
     # print("Secret Key = " + str(secretKey) + ", found in " + str(foundKey_time-foundY_time) + " seconds!")
     
-
-        
-if __name__ == "__main__":
-
-    NUM_OF_BITS = 17 #num of bits that p is generated from
-
+def graph(numOfBits,trials,isSemiLogGraph):
     x =[]
     y = []
-    for i in range(2,16):
-        NUM_OF_BITS = i
-        (avgX, avgY) = averageAttackSpeed(20)
+    for i in range(2,numOfBits):
+        (avgX, avgY) = averageAttackSpeed(i,trials)
         x.append(i)
-        y.append(math.log10((avgX+avgY)/2))
+        if isSemiLogGraph:
+            y.append(math.log10((avgX+avgY)/2))
+        else:
+            y.append((avgX+avgY)/2)
 
     plt.plot(x,y)
     plt.show()
 
+        
+if __name__ == "__main__":
 
-    # averageAttackSpeed(20)
-    # attackOnce()
+    NUM_OF_BITS = 12 #num of bits that p is generated from
+
+    #Attack DH with a random p, lowest primitive root g
+    attackOnce(NUM_OF_BITS)
+
+    #Attack DH with a random p, lowest primitive root g, for some amount
+    #of trials, and returns the average time to crack private keys
+    averageAttackSpeed(NUM_OF_BITS,20)
+
+    #Attack DH with a random p, lowest primitive root g, for some amount
+    #of trials, and returns the average time to crack private keys, and graphs on a logGraph
+    graph(NUM_OF_BITS,20,True)
 
     
 
